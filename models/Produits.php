@@ -41,39 +41,41 @@ class Produits{
         return $query;
     }
 
-    /**
-     * Créer un produit
-     *
-     * @return void
-     */
-    public function creer(){
+ /**
+  * Créer un produit
+  * 
+  * @return void
+  */
+  public function creer(){
 
-        // Ecriture de la requête SQL en y insérant le nom de la table
-        $sql = "INSERT INTO " . $this->table . " SET nom=:nom, prix=:prix, description=:description, categories_id=:categories_id, created_at=:created_at";
+    // Ecriture de la requête SQL en y insérant le nom de la table
+    $sql = "INSERT INTO " . $this->table . "SET nom = :nom, prix = :prix, description = :description, categories_id = :categories_id, created_at = :created_at";
 
-        // Préparation de la requête
-        $query = $this->connexion->prepare($sql);
+    // Préparation de la requête
+    $query = $this->connexion->prepare($sql);
 
-        // Protection contre les injections
-        $this->nom=htmlspecialchars(strip_tags($this->nom));
-        $this->prix=htmlspecialchars(strip_tags($this->prix));
-        $this->description=htmlspecialchars(strip_tags($this->description));
-        $this->categories_id=htmlspecialchars(strip_tags($this->categories_id));
-        $this->created_at=htmlspecialchars(strip_tags($this->created_at));
+    // Protection contre les injections, failles XSS + avec $this->..., on "hydrate" chacune des propriétés de l'objet = une méthode hydratant un objet consiste à assigner des valeurs aux attributs souhaités de cet objet (cad par exemple remplir les attributs de l'objet avec les valeurs entrées par l'utilisateur via un formulaire)
+    $this->nom=htmlspecialchars(strip_tags($this->nom));
+    $this->prix=htmlspecialchars(strip_tags($this->prix));
+    $this->description=htmlspecialchars(strip_tags($this->description));
+    $this->categories_id=htmlspecialchars(strip_tags($this->nom));
+    $this->created_at=htmlspecialchars(strip_tags($this->created_at));
 
-        // Ajout des données protégées
-        $query->bindParam(":nom", $this->nom);
-        $query->bindParam(":prix", $this->prix);
-        $query->bindParam(":description", $this->description);
-        $query->bindParam(":categories_id", $this->categories_id);
-        $query->bindParam(":created_at", $this->created_at);
+    // Ajout des données protégées 
+    $query->bindParam(":nom", $this->nom);
+    $query->bindParam(":prix", $this->prix);
+    $query->bindParam(":description", $this->description);
+    $query->bindParam(":categories_id", $this->categories_id);
+    $query->bindParam(":created_at", $this->created_at);
+    // NB Le bind fait le lien entre les éléments de la requête et les champs en bdd. Différence principale entre bindParam et bindValue = bindValue est une valeur fixe, figée. Avec bindParam, si la variable change par la suite, cela va changer directement dans la requête sans avoir à refaire un bind.
 
-        // Exécution de la requête
-        if($query->execute()){
-            return true;
-        }
-        return false;
+    // Exécution de la requête
+    if($query->execute()){
+        return true;
     }
+    return false;
+
+  }
 
     /**
      * Lire un produit
